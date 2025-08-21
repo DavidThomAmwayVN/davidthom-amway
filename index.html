@@ -1,267 +1,335 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Amway – Danh mục nhãn hàng</title>
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <meta name="description" content="Danh mục nhãn hàng Amway: Nutrilite, BodyKey, Artistry, Glister, Amway Home, g&h, Satinique, eSpring, Amway Queen, Atmosphere, XS Energy, Truvivity."/>
+  <style>
+    /* Scrollbar nhẹ nhàng cho panel chi tiết */
+    .nice-scroll::-webkit-scrollbar{ width:8px; height:8px }
+    .nice-scroll::-webkit-scrollbar-thumb{ background:#d1d5db; border-radius:999px }
+    .backdrop{ position:fixed; inset:0; background:rgba(0,0,0,.25) }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-sky-50/70 to-white text-gray-900">
+  <div id="root"></div>
 
-// ================= DATA =================
-const BRANDS = [
-  {
-    id: "nutrilite",
-    name: "Nutrilite",
-    tagline: "Thực phẩm bổ sung dinh dưỡng số 1 thế giới",
-    category: "Dinh dưỡng",
-    logo: "/images/nutrilite-logo.png",
-    hero: "/images/nutrilite-hero.jpg",
-    gallery: ["/images/nutrilite1.jpg", "/images/nutrilite2.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Chiết xuất thực vật tự nhiên", "Đạt chuẩn toàn cầu", "Giúp tăng cường sức khỏe"],
-    products: ["Vitamin C", "Double X", "Omega-3"]
-  },
-  {
-    id: "bodykey",
-    name: "BodyKey",
-    tagline: "Giải pháp quản lý cân nặng khoa học",
-    category: "Dinh dưỡng & Quản lý cân nặng",
-    logo: "/images/bodykey-logo.png",
-    hero: "/images/bodykey-hero.jpg",
-    gallery: ["/images/bodykey1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Thực đơn khoa học", "Shake dinh dưỡng", "Ứng dụng hỗ trợ"],
-    products: ["BodyKey Shake", "Thanh Protein"]
-  },
-  {
-    id: "artistry",
-    name: "Artistry",
-    tagline: "Mỹ phẩm & chăm sóc da cao cấp",
-    category: "Làm đẹp",
-    logo: "/images/artistry-logo.png",
-    hero: "/images/artistry-hero.jpg",
-    gallery: ["/images/artistry1.jpg", "/images/artistry2.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Công nghệ tiên tiến", "Chiết xuất thực vật Nutrilite", "Chăm sóc da chuyên sâu"],
-    products: ["Artistry Skin Nutrition", "Artistry Signature Select"]
-  },
-  {
-    id: "glister",
-    name: "Glister",
-    tagline: "Chăm sóc răng miệng toàn diện",
-    category: "Chăm sóc cá nhân",
-    logo: "/images/glister-logo.png",
-    hero: "/images/glister-hero.jpg",
-    gallery: ["/images/glister1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Kem đánh răng đa năng", "Nước súc miệng", "Bàn chải mềm mại"],
-    products: ["Glister Toothpaste", "Glister Mouthwash"]
-  },
-  {
-    id: "amwayhome",
-    name: "Amway Home",
-    tagline: "Sản phẩm tẩy rửa an toàn, bảo vệ môi trường",
-    category: "Nhà cửa",
-    logo: "/images/amwayhome-logo.png",
-    hero: "/images/amwayhome-hero.jpg",
-    gallery: ["/images/amwayhome1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Không chứa hóa chất độc hại", "Thân thiện môi trường"],
-    products: ["SA8 Bột giặt", "LOC Tẩy rửa đa năng"]
-  },
-  {
-    id: "gh",
-    name: "g&h",
-    tagline: "Chăm sóc cơ thể dịu nhẹ & bảo vệ làn da",
-    category: "Chăm sóc cá nhân",
-    logo: "/images/gh-logo.png",
-    hero: "/images/gh-hero.jpg",
-    gallery: ["/images/gh1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Sữa tắm dịu nhẹ", "Lotion dưỡng ẩm", "Bảo vệ da"],
-    products: ["g&h Nourish", "g&h Refresh"]
-  },
-  {
-    id: "satinique",
-    name: "Satinique",
-    tagline: "Dưỡng tóc & phục hồi tóc hư tổn",
-    category: "Chăm sóc tóc",
-    logo: "/images/satinique-logo.png",
-    hero: "/images/satinique-hero.jpg",
-    gallery: ["/images/satinique1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Nuôi dưỡng tóc", "Công thức ENERJUVE", "Phục hồi hư tổn"],
-    products: ["Satinique Dầu gội", "Satinique Dầu xả"]
-  },
-  {
-    id: "espring",
-    name: "eSpring",
-    tagline: "Máy lọc nước cao cấp, bảo vệ sức khỏe gia đình",
-    category: "Thiết bị gia dụng",
-    logo: "/images/espring-logo.png",
-    hero: "/images/espring-hero.jpg",
-    gallery: ["/images/espring1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Công nghệ UV", "Loại bỏ tạp chất", "Đạt chuẩn NSF"],
-    products: ["Máy lọc nước eSpring"]
-  },
-  {
-    id: "queen",
-    name: "Amway Queen",
-    tagline: "Bộ nồi Inox 18/10 giữ trọn dinh dưỡng khi nấu ăn",
-    category: "Dụng cụ nhà bếp",
-    logo: "/images/queen-logo.png",
-    hero: "/images/queen-hero.jpg",
-    gallery: ["/images/queen1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Inox 18/10", "Truyền nhiệt đều", "Giữ dinh dưỡng"],
-    products: ["Bộ nồi Amway Queen"]
-  },
-  {
-    id: "atmosphere",
-    name: "Atmosphere Sky / Mini",
-    tagline: "Máy lọc không khí hiện đại",
-    category: "Thiết bị gia dụng",
-    logo: "/images/atmosphere-logo.png",
-    hero: "/images/atmosphere-hero.jpg",
-    gallery: ["/images/atmosphere1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Lọc bụi siêu mịn PM2.5", "Công suất mạnh mẽ"],
-    products: ["Atmosphere Sky", "Atmosphere Mini"]
-  },
-  {
-    id: "xsenergy",
-    name: "XS Energy",
-    tagline: "Thức uống tăng lực bổ sung vitamin B",
-    category: "Đồ uống năng lượng",
-    logo: "/images/xsenergy-logo.png",
-    hero: "/images/xsenergy-hero.jpg",
-    gallery: ["/images/xsenergy1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Năng lượng không đường", "Vitamin nhóm B", "Nhiều hương vị"],
-    products: ["XS Energy Tropical", "XS Energy Citrus"]
-  },
-  {
-    id: "truvivity",
-    name: "Truvivity by Nutrilite",
-    tagline: "Dinh dưỡng làm đẹp từ bên trong",
-    category: "Làm đẹp & Dinh dưỡng",
-    logo: "/images/truvivity-logo.png",
-    hero: "/images/truvivity-hero.jpg",
-    gallery: ["/images/truvivity1.jpg"],
-    video: "https://www.youtube.com/embed/placeholder",
-    highlights: ["Bổ sung Collagen", "Chống oxy hóa", "Làm đẹp da"],
-    products: ["Truvivity Beauty Powder Drink", "Truvivity Soft Drops"]
-  }
-];
+  <!-- React 18 + ReactDOM UMD -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <!-- Babel để transpile JSX trực tiếp trên GitHub Pages -->
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Framer Motion UMD (tuỳ chọn, cho hiệu ứng mượt) -->
+  <script src="https://unpkg.com/framer-motion/dist/framer-motion.umd.js"></script>
 
-// ================= COMPONENT =================
-export default function AmwayBrands() {
-  const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(null);
+  <script type="text/babel">
+    const { useState, useMemo, useEffect } = React;
+    const { motion, AnimatePresence } = window["framer-motion"] || {};
 
-  const filtered = BRANDS.filter((b) =>
-    b.name.toLowerCase().includes(search.toLowerCase())
-  );
+    // =============== GROUPS (lọc nhanh) ===============
+    const GROUPS = [
+      { key: "all", label: "Tất cả" },
+      { key: "nutrition", label: "Dinh dưỡng" },
+      { key: "weight", label: "Cân nặng" },
+      { key: "beauty", label: "Làm đẹp" },
+      { key: "oral", label: "Răng miệng" },
+      { key: "home", label: "Nhà cửa" },
+      { key: "personal", label: "Cơ thể" },
+      { key: "hair", label: "Tóc" },
+      { key: "water", label: "Lọc nước" },
+      { key: "cookware", label: "Nồi chảo" },
+      { key: "air", label: "Không khí" },
+      { key: "energy", label: "Năng lượng" },
+    ];
 
-  return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold text-center mb-6">Danh mục sản phẩm Amway</h1>
+    // =============== DATA (12 danh mục) ===============
+    const BRANDS = [
+      {
+        id:"nutrilite", name:"Nutrilite", groups:["nutrition"],
+        tagline:"Thực phẩm bổ sung dinh dưỡng số 1 thế giới",
+        logo:"https://i.ibb.co/3kmRX5F/nutrilite-logo.png",
+        hero:"https://images.unsplash.com/photo-1524592937752-86a9b889a31f?q=80&w=1400&auto=format&fit=crop",
+        gallery:[
+          "https://images.unsplash.com/photo-1511993226957-cd166aba52d4?q=80&w=1200&auto=format&fit=crop",
+          "https://images.unsplash.com/photo-1556911220-bff31c812dba?q=80&w=1200&auto=format&fit=crop",
+        ],
+        video:"",
+        highlights:["Chiết xuất thực vật", "Tiêu chuẩn toàn cầu", "Danh mục đa dạng"],
+        products:["Double X", "Daily", "Omega-3"]
+      },
+      {
+        id:"bodykey", name:"BodyKey", groups:["weight","nutrition"],
+        tagline:"Giải pháp quản lý cân nặng khoa học",
+        logo:"https://i.ibb.co/3T5K8f4/bodykey-logo.png",
+        hero:"https://images.unsplash.com/photo-1514512364185-4c2b1b3f4a2f?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1512621776951-a57141f2eefd?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Bữa ăn thay thế", "Theo dõi thói quen"],
+        products:["Shake BodyKey", "Thanh Protein"]
+      },
+      {
+        id:"artistry", name:"Artistry", groups:["beauty"],
+        tagline:"Mỹ phẩm & chăm sóc da cao cấp",
+        logo:"https://i.ibb.co/LJzLxRb/artistry-logo.png",
+        hero:"https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Công nghệ tiên tiến", "Chiết xuất Nutrilite"],
+        products:["Skin Nutrition", "Essentials"]
+      },
+      {
+        id:"glister", name:"Glister", groups:["oral"],
+        tagline:"Chăm sóc răng miệng toàn diện",
+        logo:"https://i.ibb.co/WVtXRd2/glister-logo.png",
+        hero:"https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Kem đánh răng, nước súc miệng, bàn chải"],
+        products:["Kem đánh răng Glister"]
+      },
+      {
+        id:"amway-home", name:"Amway Home", groups:["home"],
+        tagline:"Sản phẩm tẩy rửa an toàn, bảo vệ môi trường",
+        logo:"https://i.ibb.co/9w1GmC4/amway-home-logo.png",
+        hero:"https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1581578731548-c64695cc6952?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["SA8, L.O.C., Dish Drops"],
+        products:["SA8", "L.O.C."]
+      },
+      {
+        id:"g-and-h", name:"g&h", groups:["personal"],
+        tagline:"Chăm sóc cơ thể dịu nhẹ & bảo vệ làn da",
+        logo:"https://i.ibb.co/7Q6C6dW/gh-logo.png",
+        hero:"https://images.unsplash.com/photo-1603650071729-44763087b2e5?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1603650071729-44763087b2e5?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Sữa tắm, dưỡng thể, rửa tay"],
+        products:["g&h NOURISH+"]
+      },
+      {
+        id:"satinique", name:"Satinique", groups:["hair","personal"],
+        tagline:"Dưỡng tóc & phục hồi tóc hư tổn",
+        logo:"https://i.ibb.co/f8GvRdc/satinique-logo.png",
+        hero:"https://images.unsplash.com/photo-1510414696678-2415ad8474aa?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1510414696678-2415ad8474aa?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Công nghệ ENERJUVE", "Mềm mượt, phục hồi"],
+        products:["Smooth Moisture"]
+      },
+      {
+        id:"espring", name:"eSpring", groups:["water"],
+        tagline:"Máy lọc nước cao cấp, bảo vệ sức khỏe gia đình",
+        logo:"https://i.ibb.co/2yq0PzM/espring-logo.png",
+        hero:"https://images.unsplash.com/photo-1562176552-0d47f9db0fd0?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1562176552-0d47f9db0fd0?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Carbon + đèn UV", "Chứng nhận NSF"],
+        products:["eSpring 2"]
+      },
+      {
+        id:"amway-queen", name:"Amway Queen", groups:["cookware"],
+        tagline:"Bộ nồi Inox 18/10 giữ trọn dinh dưỡng khi nấu ăn",
+        logo:"https://i.ibb.co/9vk8B1C/amway-queen-logo.png",
+        hero:"https://images.unsplash.com/photo-1556909212-d5b604d0ce1a?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1556909212-d5b604d0ce1a?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Truyền nhiệt đều", "Đa lớp bền bỉ"],
+        products:["Bộ nồi 6 món"]
+      },
+      {
+        id:"atmosphere", name:"Atmosphere Sky / Mini", groups:["air"],
+        tagline:"Máy lọc không khí hiện đại",
+        logo:"https://i.ibb.co/YLQz4zq/atmosphere-mini-logo.png",
+        hero:"https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1563986768494-4dee2763ff3f?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["HEPA hiệu suất cao", "Lọc bụi mịn PM2.5"],
+        products:["Atmosphere Sky", "Atmosphere Mini"]
+      },
+      {
+        id:"xs-energy", name:"XS Energy", groups:["energy"],
+        tagline:"Thức uống tăng lực bổ sung vitamin B",
+        logo:"https://upload.wikimedia.org/wikipedia/commons/thumb/1/10/XS_Energy_Drink_logo.svg/320px-XS_Energy_Drink_logo.svg.png",
+        hero:"https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Không đường (nhiều hương)", "Vitamin nhóm B"],
+        products:["XS Tropical", "XS Citrus"]
+      },
+      {
+        id:"truvivity", name:"Truvivity by Nutrilite", groups:["beauty","nutrition"],
+        tagline:"Dinh dưỡng làm đẹp từ bên trong",
+        logo:"https://i.ibb.co/6w7Qj7v/truvivity-logo.png",
+        hero:"https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1400&auto=format&fit=crop",
+        gallery:["https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?q=80&w=1200&auto=format&fit=crop"],
+        video:"",
+        highlights:["Chống oxy hoá", "Hỗ trợ đẹp da"],
+        products:["Beauty Powder Drink", "Soft Drops"]
+      },
+    ];
 
-      <div className="max-w-md mx-auto mb-6">
-        <Input
-          placeholder="Tìm kiếm nhãn hàng..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {filtered.map((brand) => (
-          <motion.div key={brand.id} whileHover={{ scale: 1.03 }}>
-            <Card onClick={() => setSelected(brand)} className="cursor-pointer">
-              <CardContent className="p-4 flex flex-col items-center">
-                <img src={brand.logo} alt={brand.name} className="h-12 mb-3" />
-                <h2 className="text-lg font-semibold">{brand.name}</h2>
-                <p className="text-sm text-gray-600 text-center">{brand.tagline}</p>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
-      {selected && (
-        <motion.div
-          initial={{ x: "100%" }}
-          animate={{ x: 0 }}
-          exit={{ x: "100%" }}
-          className="fixed top-0 right-0 w-full md:w-1/2 h-full bg-white shadow-xl overflow-y-auto z-50 p-6"
-        >
-          <Button variant="outline" onClick={() => setSelected(null)}>
-            Đóng
-          </Button>
-
-          <div className="mt-4">
-            <img
-              src={selected.hero}
-              alt={selected.name}
-              className="w-full rounded-lg shadow mb-4"
-              loading="lazy"
+    // =============== Components ===============
+    function Toolbar({ query, setQuery, group, setGroup }){
+      return (
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="relative w-full md:w-96">
+            <input
+              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 pl-10 text-sm shadow-sm focus:outline-none"
+              placeholder="Tìm theo thương hiệu hoặc mô tả…"
+              value={query}
+              onChange={(e)=>setQuery(e.target.value)}
             />
-            <h2 className="text-2xl font-bold mb-2">{selected.name}</h2>
-            <p className="text-gray-700 mb-4">{selected.tagline}</p>
-
-            <Tabs defaultValue="images">
-              <TabsList>
-                <TabsTrigger value="images">Hình ảnh</TabsTrigger>
-                <TabsTrigger value="video">Video</TabsTrigger>
-              </TabsList>
-              <TabsContent value="images">
-                <div className="grid grid-cols-2 gap-2 mt-4">
-                  {selected.gallery.map((img, i) => (
-                    <img key={i} src={img} alt={selected.name} className="rounded-lg" />
-                  ))}
-                </div>
-              </TabsContent>
-              <TabsContent value="video">
-                <div className="mt-4 aspect-video">
-                  <iframe
-                    src={selected.video}
-                    title="video"
-                    className="w-full h-full rounded-lg"
-                    allowFullScreen
-                  />
-                </div>
-              </TabsContent>
-            </Tabs>
-
-            <Accordion type="single" collapsible className="mt-6">
-              <AccordionItem value="highlights">
-                <AccordionTrigger>Điểm nổi bật</AccordionTrigger>
-                <AccordionContent>
-                  <ul className="list-disc list-inside">
-                    {selected.highlights.map((h, i) => (
-                      <li key={i}>{h}</li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="products">
-                <AccordionTrigger>Sản phẩm tiêu biểu</AccordionTrigger>
-                <AccordionContent>
-                  <ul className="list-disc list-inside">
-                    {selected.products.map((p, i) => (
-                      <li key={i}>{p}</li>
-                    ))}
-                  </ul>
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
           </div>
-        </motion.div>
-      )}
-    </div>
-  );
-}
+          <div className="flex flex-wrap gap-2">
+            {GROUPS.map(g=> (
+              <button key={g.key} onClick={()=>setGroup(g.key)}
+                className={`rounded-full border px-3 py-1.5 text-xs md:text-sm ${group===g.key? 'bg-sky-600 text-white border-sky-600':'bg-white text-gray-700 border-gray-200'}`}>{g.label}</button>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function BrandCard({ brand, onOpen }){
+      const CardWrap = motion ? motion.div : 'div';
+      return (
+        <CardWrap whileHover={{ scale: 1.01 }} className="group cursor-pointer overflow-hidden rounded-2xl border border-gray-200 shadow-sm bg-white" onClick={()=>onOpen(brand)}>
+          <div className="relative aspect-[16/9] w-full overflow-hidden">
+            <img src={brand.hero} alt={brand.name} loading="lazy" className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"/>
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent"/>
+            <div className="absolute left-4 bottom-3 flex items-center gap-3">
+              <div className="h-10 w-10 rounded-full bg-white/90 ring-1 ring-black/5 grid place-items-center overflow-hidden">
+                <img src={brand.logo} alt={`${brand.name} logo`} className="h-7 w-7 object-contain"/>
+              </div>
+              <div>
+                <p className="text-white/80 text-xs">Thương hiệu</p>
+                <h3 className="text-white font-semibold text-base md:text-lg">{brand.name}</h3>
+              </div>
+            </div>
+          </div>
+          <div className="p-4">
+            <p className="text-sm text-gray-600 line-clamp-2">{brand.tagline}</p>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {brand.groups.map(g => <span key={g} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-700">{GROUPS.find(x=>x.key===g)?.label || g}</span>)}
+            </div>
+          </div>
+        </CardWrap>
+      );
+    }
+
+    function DetailPanel({ brand, onClose }){
+      if(!brand) return null;
+      return (
+        <div className="backdrop" onClick={onClose}>
+          <aside className="nice-scroll fixed right-0 top-0 h-full w-full sm:w-[480px] bg-white shadow-2xl p-6 overflow-y-auto" onClick={(e)=>e.stopPropagation()}>
+            <button className="rounded-full border px-3 py-1 text-sm" onClick={onClose}>Đóng</button>
+            <img src={brand.hero} alt={brand.name} className="w-full rounded-xl shadow mt-4 mb-4" loading="lazy"/>
+            <h2 className="text-2xl font-bold">{brand.name}</h2>
+            <p className="text-gray-700 mt-1">{brand.tagline}</p>
+
+            <div className="mt-5">
+              <div className="flex gap-2 border-b">
+                <button className="tab-btn px-3 py-2 text-sm font-medium" data-tab="gallery">Hình ảnh</button>
+                <button className="tab-btn px-3 py-2 text-sm font-medium" data-tab="video">Video</button>
+              </div>
+              <div id="tab-gallery" className="tab-panel mt-3 grid grid-cols-2 gap-2">
+                {[brand.hero, ...(brand.gallery||[])].filter(Boolean).map((src,i)=> (
+                  <img key={i} src={src} alt={`${brand.name} ${i+1}`} className="rounded-lg" loading="lazy"/>
+                ))}
+              </div>
+              <div id="tab-video" className="tab-panel hidden mt-3">
+                {brand.video ? (
+                  <div className="relative w-full overflow-hidden rounded-xl" style={{paddingTop:'56.25%'}}>
+                    <iframe src={brand.video} title={`${brand.name} video`} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="absolute inset-0 h-full w-full border-0"></iframe>
+                  </div>
+                ) : (
+                  <div className="text-sm text-gray-600">Chưa có video. Thêm link YouTube/Vimeo vào dữ liệu.</div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <details className="rounded-xl border p-4" open>
+                <summary className="cursor-pointer font-medium">Điểm nổi bật</summary>
+                <ul className="mt-2 list-disc pl-5 space-y-1 text-gray-700">
+                  {(brand.highlights||[]).map((h,i)=> <li key={i}>{h}</li>)}
+                </ul>
+              </details>
+              <details className="rounded-xl border p-4 mt-3">
+                <summary className="cursor-pointer font-medium">Sản phẩm tiêu biểu</summary>
+                <ul className="mt-2 list-disc pl-5 space-y-1 text-gray-700">
+                  {(brand.products||[]).map((p,i)=> <li key={i}>{p}</li>)}
+                </ul>
+              </details>
+            </div>
+          </aside>
+        </div>
+      );
+    }
+
+    function App(){
+      const [query, setQuery] = useState("");
+      const [group, setGroup] = useState("all");
+      const [opened, setOpened] = useState(null);
+
+      useEffect(()=>{
+        // Simple tabs inside detail panel
+        function handle(e){
+          const btn = e.target.closest('.tab-btn');
+          if(!btn) return;
+          const wrap = btn.closest('aside');
+          wrap.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('border-b-2','border-sky-600'));
+          btn.classList.add('border-b-2','border-sky-600');
+          const tab = btn.getAttribute('data-tab');
+          wrap.querySelectorAll('.tab-panel').forEach(p=>p.classList.add('hidden'));
+          wrap.querySelector('#tab-'+tab).classList.remove('hidden');
+        }
+        document.addEventListener('click', handle);
+        return ()=>document.removeEventListener('click', handle);
+      },[]);
+
+      const items = useMemo(()=>{
+        const q = query.toLowerCase();
+        return BRANDS.filter(b=>{
+          const t = (b.name + ' ' + b.tagline).toLowerCase();
+          const okQ = !q || t.includes(q);
+          const okG = group==='all' || b.groups.includes(group);
+          return okQ && okG;
+        }).sort((a,b)=> a.name.localeCompare(b.name));
+      },[query, group]);
+
+      return (
+        <div className="min-h-screen">
+          <section className="mx-auto max-w-7xl px-4 pt-10 pb-6 text-center">
+            <h1 className="text-3xl md:text-4xl font-bold">Danh mục sản phẩm Amway</h1>
+            <p className="mt-2 text-gray-600">Đủ 12 nhãn hàng – ảnh/video chèn dễ dàng – trải nghiệm mượt trên GitHub Pages.</p>
+            <div className="mt-6"><Toolbar query={query} setQuery={setQuery} group={group} setGroup={setGroup}/></div>
+          </section>
+
+          <section className="mx-auto max-w-7xl px-4 pb-16 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {items.map(b=> <BrandCard key={b.id} brand={b} onOpen={setOpened}/>) }
+          </section>
+
+          <DetailPanel brand={opened} onClose={()=>setOpened(null)} />
+
+          <footer className="border-t bg-white/60">
+            <div className="mx-auto max-w-7xl px-4 py-8 text-center text-sm text-gray-600">© <span id="y"></span> David Thom – Nhà Phân Phối Chính Hãng Amway VN</div>
+          </footer>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App/>);
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
 
 Update website chuyên nghiệp hơn
 Commit directly to the main branch
