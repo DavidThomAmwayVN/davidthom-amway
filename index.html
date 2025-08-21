@@ -1,137 +1,267 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>David Thom | Nhà Phân Phối Chính Hãng Amway</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    header {
-      background: linear-gradient(to right, #0066cc, #00cc99);
-      color: white;
-      text-align: center;
-      padding: 50px 20px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 36px;
-    }
-    header p {
-      font-size: 18px;
-    }
-    section {
-      padding: 40px 20px;
-      max-width: 1000px;
-      margin: auto;
-    }
-    .about {
-      text-align: center;
-    }
-    .about img {
-      width: 200px;
-      border-radius: 15px;
-      margin-bottom: 20px;
-    }
-    .products {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 20px;
-    }
-    .product-card {
-      background: white;
-      border-radius: 10px;
-      padding: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-    .product-card img {
-      width: 100%;
-      border-radius: 10px;
-    }
-    .contact {
-      text-align: center;
-      margin-top: 40px;
-    }
-    .contact a {
-      display: inline-block;
-      margin: 10px;
-      padding: 12px 25px;
-      border-radius: 30px;
-      text-decoration: none;
-      font-weight: bold;
-      color: white;
-      transition: 0.3s;
-    }
-    .zalo { background: #0066cc; }
-    .facebook { background: #1877f2; }
-    .gmail { background: #dd4b39; }
-    .contact a:hover { opacity: 0.8; }
-    footer {
-      background: #333;
-      color: white;
-      text-align: center;
-      padding: 15px;
-      margin-top: 40px;
-    }
-  </style>
-</head>
-<body>
+import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
 
-  <!-- Banner -->
-  <header>
-    <h1>David Thom</h1>
-    <p>Nhà Phân Phối Chính Hãng Amway VN</p>
-  </header>
+// ================= DATA =================
+const BRANDS = [
+  {
+    id: "nutrilite",
+    name: "Nutrilite",
+    tagline: "Thực phẩm bổ sung dinh dưỡng số 1 thế giới",
+    category: "Dinh dưỡng",
+    logo: "/images/nutrilite-logo.png",
+    hero: "/images/nutrilite-hero.jpg",
+    gallery: ["/images/nutrilite1.jpg", "/images/nutrilite2.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Chiết xuất thực vật tự nhiên", "Đạt chuẩn toàn cầu", "Giúp tăng cường sức khỏe"],
+    products: ["Vitamin C", "Double X", "Omega-3"]
+  },
+  {
+    id: "bodykey",
+    name: "BodyKey",
+    tagline: "Giải pháp quản lý cân nặng khoa học",
+    category: "Dinh dưỡng & Quản lý cân nặng",
+    logo: "/images/bodykey-logo.png",
+    hero: "/images/bodykey-hero.jpg",
+    gallery: ["/images/bodykey1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Thực đơn khoa học", "Shake dinh dưỡng", "Ứng dụng hỗ trợ"],
+    products: ["BodyKey Shake", "Thanh Protein"]
+  },
+  {
+    id: "artistry",
+    name: "Artistry",
+    tagline: "Mỹ phẩm & chăm sóc da cao cấp",
+    category: "Làm đẹp",
+    logo: "/images/artistry-logo.png",
+    hero: "/images/artistry-hero.jpg",
+    gallery: ["/images/artistry1.jpg", "/images/artistry2.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Công nghệ tiên tiến", "Chiết xuất thực vật Nutrilite", "Chăm sóc da chuyên sâu"],
+    products: ["Artistry Skin Nutrition", "Artistry Signature Select"]
+  },
+  {
+    id: "glister",
+    name: "Glister",
+    tagline: "Chăm sóc răng miệng toàn diện",
+    category: "Chăm sóc cá nhân",
+    logo: "/images/glister-logo.png",
+    hero: "/images/glister-hero.jpg",
+    gallery: ["/images/glister1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Kem đánh răng đa năng", "Nước súc miệng", "Bàn chải mềm mại"],
+    products: ["Glister Toothpaste", "Glister Mouthwash"]
+  },
+  {
+    id: "amwayhome",
+    name: "Amway Home",
+    tagline: "Sản phẩm tẩy rửa an toàn, bảo vệ môi trường",
+    category: "Nhà cửa",
+    logo: "/images/amwayhome-logo.png",
+    hero: "/images/amwayhome-hero.jpg",
+    gallery: ["/images/amwayhome1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Không chứa hóa chất độc hại", "Thân thiện môi trường"],
+    products: ["SA8 Bột giặt", "LOC Tẩy rửa đa năng"]
+  },
+  {
+    id: "gh",
+    name: "g&h",
+    tagline: "Chăm sóc cơ thể dịu nhẹ & bảo vệ làn da",
+    category: "Chăm sóc cá nhân",
+    logo: "/images/gh-logo.png",
+    hero: "/images/gh-hero.jpg",
+    gallery: ["/images/gh1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Sữa tắm dịu nhẹ", "Lotion dưỡng ẩm", "Bảo vệ da"],
+    products: ["g&h Nourish", "g&h Refresh"]
+  },
+  {
+    id: "satinique",
+    name: "Satinique",
+    tagline: "Dưỡng tóc & phục hồi tóc hư tổn",
+    category: "Chăm sóc tóc",
+    logo: "/images/satinique-logo.png",
+    hero: "/images/satinique-hero.jpg",
+    gallery: ["/images/satinique1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Nuôi dưỡng tóc", "Công thức ENERJUVE", "Phục hồi hư tổn"],
+    products: ["Satinique Dầu gội", "Satinique Dầu xả"]
+  },
+  {
+    id: "espring",
+    name: "eSpring",
+    tagline: "Máy lọc nước cao cấp, bảo vệ sức khỏe gia đình",
+    category: "Thiết bị gia dụng",
+    logo: "/images/espring-logo.png",
+    hero: "/images/espring-hero.jpg",
+    gallery: ["/images/espring1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Công nghệ UV", "Loại bỏ tạp chất", "Đạt chuẩn NSF"],
+    products: ["Máy lọc nước eSpring"]
+  },
+  {
+    id: "queen",
+    name: "Amway Queen",
+    tagline: "Bộ nồi Inox 18/10 giữ trọn dinh dưỡng khi nấu ăn",
+    category: "Dụng cụ nhà bếp",
+    logo: "/images/queen-logo.png",
+    hero: "/images/queen-hero.jpg",
+    gallery: ["/images/queen1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Inox 18/10", "Truyền nhiệt đều", "Giữ dinh dưỡng"],
+    products: ["Bộ nồi Amway Queen"]
+  },
+  {
+    id: "atmosphere",
+    name: "Atmosphere Sky / Mini",
+    tagline: "Máy lọc không khí hiện đại",
+    category: "Thiết bị gia dụng",
+    logo: "/images/atmosphere-logo.png",
+    hero: "/images/atmosphere-hero.jpg",
+    gallery: ["/images/atmosphere1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Lọc bụi siêu mịn PM2.5", "Công suất mạnh mẽ"],
+    products: ["Atmosphere Sky", "Atmosphere Mini"]
+  },
+  {
+    id: "xsenergy",
+    name: "XS Energy",
+    tagline: "Thức uống tăng lực bổ sung vitamin B",
+    category: "Đồ uống năng lượng",
+    logo: "/images/xsenergy-logo.png",
+    hero: "/images/xsenergy-hero.jpg",
+    gallery: ["/images/xsenergy1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Năng lượng không đường", "Vitamin nhóm B", "Nhiều hương vị"],
+    products: ["XS Energy Tropical", "XS Energy Citrus"]
+  },
+  {
+    id: "truvivity",
+    name: "Truvivity by Nutrilite",
+    tagline: "Dinh dưỡng làm đẹp từ bên trong",
+    category: "Làm đẹp & Dinh dưỡng",
+    logo: "/images/truvivity-logo.png",
+    hero: "/images/truvivity-hero.jpg",
+    gallery: ["/images/truvivity1.jpg"],
+    video: "https://www.youtube.com/embed/placeholder",
+    highlights: ["Bổ sung Collagen", "Chống oxy hóa", "Làm đẹp da"],
+    products: ["Truvivity Beauty Powder Drink", "Truvivity Soft Drops"]
+  }
+];
 
-  <!-- Giới thiệu -->
-  <section class="about">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/4/4e/Amway_logo.svg/2560px-Amway_logo.svg.png" alt="Amway">
-    <h2>Chào mừng bạn đến với Amway VN</h2>
-    <p>Tôi là <b>David Thom</b>, Nhà Phân Phối Chính Hãng Amway Việt Nam. Cam kết mang đến các sản phẩm chính hãng, chất lượng và uy tín.</p>
-  </section>
+// ================= COMPONENT =================
+export default function AmwayBrands() {
+  const [search, setSearch] = useState("");
+  const [selected, setSelected] = useState(null);
 
-  <!-- Sản phẩm -->
-  <section>
-    <h2 style="text-align:center;">Sản phẩm nổi bật</h2>
-    <div class="products">
-      <div class="product-card">
-        <img src="https://amway.com.vn/media/1033/nutrilite.jpg" alt="Nutrilite">
-        <h3>Nutrilite</h3>
-        <p>Thực phẩm bổ sung dinh dưỡng từ thiên nhiên.</p>
+  const filtered = BRANDS.filter((b) =>
+    b.name.toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="p-6">
+      <h1 className="text-3xl font-bold text-center mb-6">Danh mục sản phẩm Amway</h1>
+
+      <div className="max-w-md mx-auto mb-6">
+        <Input
+          placeholder="Tìm kiếm nhãn hàng..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+        />
       </div>
-      <div class="product-card">
-        <img src="https://amway.com.vn/media/1009/artistry.jpg" alt="Artistry">
-        <h3>Artistry</h3>
-        <p>Dòng sản phẩm chăm sóc da và mỹ phẩm cao cấp.</p>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+        {filtered.map((brand) => (
+          <motion.div key={brand.id} whileHover={{ scale: 1.03 }}>
+            <Card onClick={() => setSelected(brand)} className="cursor-pointer">
+              <CardContent className="p-4 flex flex-col items-center">
+                <img src={brand.logo} alt={brand.name} className="h-12 mb-3" />
+                <h2 className="text-lg font-semibold">{brand.name}</h2>
+                <p className="text-sm text-gray-600 text-center">{brand.tagline}</p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        ))}
       </div>
-      <div class="product-card">
-        <img src="https://amway.com.vn/media/1014/home.jpg" alt="Home Care">
-        <h3>Home Care</h3>
-        <p>Sản phẩm chăm sóc nhà cửa an toàn và hiệu quả.</p>
-      </div>
+
+      {selected && (
+        <motion.div
+          initial={{ x: "100%" }}
+          animate={{ x: 0 }}
+          exit={{ x: "100%" }}
+          className="fixed top-0 right-0 w-full md:w-1/2 h-full bg-white shadow-xl overflow-y-auto z-50 p-6"
+        >
+          <Button variant="outline" onClick={() => setSelected(null)}>
+            Đóng
+          </Button>
+
+          <div className="mt-4">
+            <img
+              src={selected.hero}
+              alt={selected.name}
+              className="w-full rounded-lg shadow mb-4"
+              loading="lazy"
+            />
+            <h2 className="text-2xl font-bold mb-2">{selected.name}</h2>
+            <p className="text-gray-700 mb-4">{selected.tagline}</p>
+
+            <Tabs defaultValue="images">
+              <TabsList>
+                <TabsTrigger value="images">Hình ảnh</TabsTrigger>
+                <TabsTrigger value="video">Video</TabsTrigger>
+              </TabsList>
+              <TabsContent value="images">
+                <div className="grid grid-cols-2 gap-2 mt-4">
+                  {selected.gallery.map((img, i) => (
+                    <img key={i} src={img} alt={selected.name} className="rounded-lg" />
+                  ))}
+                </div>
+              </TabsContent>
+              <TabsContent value="video">
+                <div className="mt-4 aspect-video">
+                  <iframe
+                    src={selected.video}
+                    title="video"
+                    className="w-full h-full rounded-lg"
+                    allowFullScreen
+                  />
+                </div>
+              </TabsContent>
+            </Tabs>
+
+            <Accordion type="single" collapsible className="mt-6">
+              <AccordionItem value="highlights">
+                <AccordionTrigger>Điểm nổi bật</AccordionTrigger>
+                <AccordionContent>
+                  <ul className="list-disc list-inside">
+                    {selected.highlights.map((h, i) => (
+                      <li key={i}>{h}</li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="products">
+                <AccordionTrigger>Sản phẩm tiêu biểu</AccordionTrigger>
+                <AccordionContent>
+                  <ul className="list-disc list-inside">
+                    {selected.products.map((p, i) => (
+                      <li key={i}>{p}</li>
+                    ))}
+                  </ul>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </div>
+        </motion.div>
+      )}
     </div>
-  </section>
+  );
+}
 
-  <!-- Liên hệ -->
-  <section class="contact">
-    <h2>Kết nối với tôi</h2>
-    <a href="https://zalo.me/so-dien-thoai-cua-ban" class="zalo">Zalo</a>
-    <a href="https://facebook.com/ten-facebook-cua-ban" class="facebook">Facebook</a>
-    <a href="mailto:emailcuaban@gmail.com" class="gmail">Gmail</a>
-  </section>
-
-  <!-- Footer -->
-  <footer>
-    <p>© 2025 David Thom | Nhà Phân Phối Chính Hãng Amway VN</p>
-  </footer>
-
-</body>
-</html>
 Update website chuyên nghiệp hơn
 Commit directly to the main branch
