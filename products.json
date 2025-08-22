@@ -1,1 +1,19 @@
+[
+  {
+    "id": "SP001",
+    "name": "Kem Đánh Răng Đa Năng Glister",
+    "description": "Làm sạch răng, ngừa sâu răng",
+    "price": "54,000 - 139,000 đ",
+    "status": "Còn hàng",
+    "code": "124110"
+  },
+  {
+    "id": "SP002",
+    "name": "Nước súc miệng đậm đặc Glister",
+    "description": "Bảo vệ răng miệng, hơi thở thơm mát",
+    "price": "270,000 đ",
+    "status": "Còn hàng",
+    "code": "124108"
+  }
+]
 
